@@ -46,6 +46,7 @@ WORKDIR /app
 # Copy application code (light version)
 COPY docusearch_light.py .
 COPY create_embeddings_light.py .
+COPY start_app.py .
 
 # Create directories for data (will be mounted or uploaded separately)
 RUN mkdir -p embeddings extracted_content connections
@@ -57,5 +58,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/ || exit 1
 
-# Start the application
-CMD ["streamlit", "run", "docusearch_light.py", "--server.port=8080", "--server.address=0.0.0.0"]
+# Start the application using Python startup script
+CMD ["python", "start_app.py"]

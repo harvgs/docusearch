@@ -16,7 +16,7 @@ if [ ! -f "embeddings/embeddings_light.json" ]; then
     echo "Warning: embeddings_light.json not found. The app will need to generate embeddings."
 fi
 
-# Start the Streamlit application
+# Start the Streamlit application with proper port handling
 echo "Starting Document Search and Chat (Light Version) on port $PORT"
 echo "Using CPU-only PyTorch for minimal deployment size"
 streamlit run docusearch_light.py --server.port=$PORT --server.address=0.0.0.0
