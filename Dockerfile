@@ -12,7 +12,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy requirements and install Python dependencies
-COPY requirements.txt .
+COPY requirements_minimal.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Final stage with minimal runtime
@@ -29,9 +29,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Set working directory
 WORKDIR /app
 
-# Copy application code
-COPY docusearch_new.py .
-COPY create_embeddings.py .
+# Copy application code (light version)
+COPY docusearch_light.py .
+COPY create_embeddings_light.py .
 
 # Create directories for data (will be mounted or uploaded separately)
 RUN mkdir -p embeddings extracted_content connections
@@ -44,4 +44,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/ || exit 1
 
 # Start the application
-CMD ["streamlit", "run", "docusearch_new.py", "--server.port=8080", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "docusearch_light.py", "--server.port=8080", "--server.address=0.0.0.0"]
