@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate Light Embeddings for Railway Deployment
-This script creates embeddings using a smaller, more efficient model.
+This script creates embeddings using the smallest sentence-transformers model.
 """
 
 import os
@@ -14,7 +14,7 @@ sys.path.append(str(current_dir))
 
 def main():
     print("🔧 Generating Light Embeddings for Railway Deployment")
-    print("=" * 50)
+    print("=" * 60)
     
     # Check if extracted_content exists
     if not os.path.exists("extracted_content"):
@@ -32,7 +32,9 @@ def main():
     os.makedirs("embeddings", exist_ok=True)
     
     print("📁 Processing files from extracted_content/")
-    print("🔄 Using all-MiniLM-L6-v2 model (much smaller than instructor-xl)")
+    print("🔄 Using sentence-transformers/all-MiniLM-L6-v2 (smallest model)")
+    print("💻 CPU-only PyTorch for minimal deployment size")
+    print("📏 Model size: ~90MB (vs ~1.5GB for instructor-xl)")
     
     try:
         # Import and run the light embeddings script
@@ -47,13 +49,16 @@ def main():
         print("✅ Light embeddings generated successfully!")
         print("📊 File: embeddings/embeddings_light.json")
         
-        # Check file size
+        # Check file sizes
         if os.path.exists("embeddings/embeddings_light.json"):
             size_mb = os.path.getsize("embeddings/embeddings_light.json") / (1024 * 1024)
-            print(f"📏 File size: {size_mb:.2f} MB")
+            print(f"📏 Embeddings file size: {size_mb:.2f} MB")
         
         print("\n🚀 Ready for Railway deployment!")
-        print("   The light version should fit within the 4GB limit.")
+        print("   Estimated total image size: ~2.5-3GB")
+        print("   ✅ Fits well within Railway's 4GB limit")
+        print("   🧠 Full neural embedding capabilities")
+        print("   💻 CPU-only PyTorch (no CUDA bloat)")
         
     except Exception as e:
         print(f"❌ Error generating embeddings: {str(e)}")

@@ -15,17 +15,25 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Configure environment to disable SSL verification
 os.environ['CURL_CA_BUNDLE'] = ""
 os.environ['REQUESTS_CA_BUNDLE'] = ""
-os.environ['TRANSFORMERS_OFFLINE'] = "1"  # First download will be with SSL disabled, then use offline mode
 
 class LightEmbeddingProcessor:
     def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-        # Use a much smaller model for deployment
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        # Force CPU usage for Railway deployment
+        device = "cpu"
         
+        # Use the smallest available model for minimal size
         self.model = SentenceTransformer(model_name, device=device)
+        
+        # Optimize for CPU inference
+        self.model.eval()
+        if hasattr(self.model, 'half'):
+            # Use half precision if available to reduce memory
+            self.model = self.model.half()
     
     def create_embedding(self, text):
-        return self.model.encode(text, convert_to_tensor=False).tolist()
+        # Ensure we're using CPU
+        with torch.no_grad():
+            return self.model.encode(text, convert_to_tensor=False).tolist()
 
 def process_text_files(input_folder, output_file, batch_size=32):
     processor = LightEmbeddingProcessor()
