@@ -50,7 +50,26 @@ Thumbs.db
 *.tmp
 *.temp
 
-# Large data files (if not needed for deployment)
+# Large data files - exclude all data to reduce size
 extracted_content/
 connections/
-# embeddings/embeddings.json
+# embeddings/
+scrape_data.db
+
+# Test files
+test_*.py
+*_test.py
+
+# Documentation
+README_*.md
+*.md
+
+# Deployment files (not needed in container)
+deploy_railway.py
+DEPLOYMENT_CHECKLIST.md
+README_RAILWAY.md
+
+# Large model files that will be downloaded at runtime
+.cache/
+transformers_cache/
+torch_cache/

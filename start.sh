@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Railway startup script for DocuSearch
+# Railway startup script for DocuSearch (Light Version)
 
-echo "🚀 Starting DocuSearch on Railway..."
+echo "🚀 Starting DocuSearch Light on Railway..."
 
 # Check if required environment variables are set
 if [ -z "$OPENAI_API_KEY" ]; then
@@ -11,16 +11,22 @@ if [ -z "$OPENAI_API_KEY" ]; then
 fi
 
 # Check if data files exist
-if [ ! -f "embeddings/embeddings.json" ]; then
-    echo "⚠️  Warning: embeddings/embeddings.json not found"
+if [ ! -f "embeddings/embeddings_light.json" ] && [ ! -f "embeddings/embeddings.json" ]; then
+    echo "⚠️  Warning: No embeddings file found"
     echo "   Please ensure your data files are included in the deployment"
 fi
 
-# Start Streamlit
-echo "📱 Starting Streamlit application..."
-exec streamlit run docusearch_new.py \
+# Set environment variables for optimization
+export TRANSFORMERS_CACHE="/tmp/transformers_cache"
+export TORCH_HOME="/tmp/torch_cache"
+export HF_HOME="/tmp/huggingface_cache"
+
+# Start Streamlit with optimized settings
+echo "📱 Starting Streamlit application (Light Version)..."
+exec streamlit run docusearch_light.py \
     --server.port=$PORT \
     --server.address=0.0.0.0 \
     --server.headless=true \
     --server.enableCORS=false \
-    --server.enableXsrfProtection=false
+    --server.enableXsrfProtection=false \
+    --browser.gatherUsageStats=false
