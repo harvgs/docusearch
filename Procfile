@@ -1,1 +1,1 @@
-web: python setup_embeddings.py && python debug_files.py && streamlit run docusearch_light.py --server.port=8080 --server.address=0.0.0.0
+web: streamlit run docusearch_light.py --server.port=8080 --server.address=0.0.0.0

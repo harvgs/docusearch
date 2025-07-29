@@ -162,43 +162,35 @@ def load_embeddings_data():
                 st.warning(f"Failed to load {embeddings_file}: {str(e)}")
                 continue
     
-    # If no embeddings file found, try to generate them
-    st.warning("No embeddings file found. Attempting to generate embeddings...")
+    # If no embeddings file found, create a minimal fallback
+    st.warning("No embeddings file found. Creating minimal fallback embeddings...")
     
     try:
-        # Try to import and run the embedding creation
-        from create_embeddings_light import create_embeddings
+        # Create a minimal embeddings structure
+        minimal_embeddings = {
+            "embeddings": [],
+            "documents": [
+                {
+                    "content": "This is a fallback document. Please upload your embeddings file or text files to generate proper embeddings.",
+                    "source_url": "fallback",
+                    "file_path": "fallback.txt"
+                }
+            ]
+        }
         
-        # Check if we have any text files to embed
-        text_files = []
-        for root, dirs, files in os.walk("extracted_content"):
-            for file in files:
-                if file.endswith(".txt"):
-                    text_files.append(os.path.join(root, file))
+        # Save the minimal embeddings
+        os.makedirs("embeddings", exist_ok=True)
+        with open("embeddings/embeddings_light.json", "w") as f:
+            json.dump(minimal_embeddings, f)
         
-        if text_files:
-            st.info(f"Found {len(text_files)} text files. Generating embeddings...")
-            
-            # Create embeddings directory if it doesn't exist
-            os.makedirs("embeddings", exist_ok=True)
-            
-            # Generate embeddings
-            create_embeddings("embeddings/embeddings_light.json")
-            
-            # Try to load the newly created embeddings
-            if os.path.exists("embeddings/embeddings_light.json"):
-                st.success("Successfully generated embeddings!")
-                return load_embeddings("embeddings/embeddings_light.json")
-            else:
-                st.error("Failed to generate embeddings file")
-        else:
-            st.error("No text files found in extracted_content directory")
-            
+        st.success("Created minimal fallback embeddings!")
+        return minimal_embeddings
+        
     except Exception as e:
-        st.error(f"Failed to generate embeddings: {str(e)}")
+        st.error(f"Failed to create fallback embeddings: {str(e)}")
     
     # If we get here, show debug info
-    st.error("Error: No embeddings file found and could not generate new ones.")
+    st.error("Error: No embeddings file found and could not create fallback.")
     
     # Debug: Show what files exist
     st.write("🔍 Debug: Checking for embeddings files...")
@@ -395,6 +387,66 @@ mode = st.sidebar.radio("Choose mode:", ("Search", "Chat", "Documents"))
 
 if "total_cost" not in st.session_state:
     st.session_state.total_cost = 0.0
+
+# Sidebar for configuration
+with st.sidebar:
+    st.title("🔧 Configuration")
+    
+    # OpenAI API Key input
+    st.subheader("🔑 OpenAI API Key")
+    api_key = st.text_input(
+        "Enter your OpenAI API key",
+        value=project_api_key or "",
+        type="password",
+        help="Get your API key from https://platform.openai.com/api-keys"
+    )
+    
+    # Validate API key
+    if api_key and api_key != project_api_key:
+        is_valid, message = validate_openai_key(api_key)
+        if is_valid:
+            st.success("✅ " + message)
+            project_api_key = api_key
+        else:
+            st.error("❌ " + message)
+    
+    # Model selection
+    st.subheader("🤖 Model Selection")
+    model = st.selectbox(
+        "Choose the model",
+        ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"],
+        help="gpt-4o-mini is recommended for cost and speed"
+    )
+    
+    # Temperature setting
+    temperature = st.slider(
+        "Temperature",
+        min_value=0.0,
+        max_value=2.0,
+        value=0.7,
+        step=0.1,
+        help="Higher values make output more creative, lower values more focused"
+    )
+    
+    # Max tokens setting
+    max_tokens = st.slider(
+        "Max tokens",
+        min_value=100,
+        max_value=4000,
+        value=1000,
+        step=100,
+        help="Maximum length of the response"
+    )
+    
+    # Search results count
+    search_results = st.slider(
+        "Search results",
+        min_value=1,
+        max_value=10,
+        value=3,
+        step=1,
+        help="Number of relevant documents to include in context"
+    )
 
 if mode == "Search":
     # Create a search box
