@@ -141,21 +141,43 @@ if project_api_key:
 
 @st.cache_data
 def load_embeddings_data():
-    # Try light embeddings first, fallback to original
+    # Try multiple possible paths for embeddings file
     embeddings_files = [
+        "embeddings/embeddings_light.json",  # Current directory
+        "embeddings/embeddings.json",        # Current directory
         os.path.join(parent_directory, "embeddings", "embeddings_light.json"),
-        os.path.join(parent_directory, "embeddings", "embeddings.json")
+        os.path.join(parent_directory, "embeddings", "embeddings.json"),
+        "/app/embeddings/embeddings_light.json",  # Railway Docker path
+        "/app/embeddings/embeddings.json",        # Railway Docker path
+        "./embeddings/embeddings_light.json",     # Relative to current
+        "./embeddings/embeddings.json"            # Relative to current
     ]
     
     for embeddings_file in embeddings_files:
         if os.path.exists(embeddings_file):
             try:
+                st.info(f"Loading embeddings from: {embeddings_file}")
                 return load_embeddings(embeddings_file)
             except Exception as e:
                 st.warning(f"Failed to load {embeddings_file}: {str(e)}")
                 continue
     
+    # If no embeddings file found, show available files
     st.error("Error: No embeddings file found. Please run create_embeddings_light.py or create_embeddings.py first.")
+    
+    # Debug: Show what files exist
+    st.write("🔍 Debug: Checking for embeddings files...")
+    for path in ["embeddings", "/app/embeddings", "./embeddings"]:
+        if os.path.exists(path):
+            st.write(f"Directory exists: {path}")
+            try:
+                files = os.listdir(path)
+                st.write(f"Files in {path}: {files}")
+            except Exception as e:
+                st.write(f"Error listing {path}: {e}")
+        else:
+            st.write(f"Directory does not exist: {path}")
+    
     st.stop()
 
 def search_database(query, embeddings_data, k=5):
