@@ -162,8 +162,43 @@ def load_embeddings_data():
                 st.warning(f"Failed to load {embeddings_file}: {str(e)}")
                 continue
     
-    # If no embeddings file found, show available files
-    st.error("Error: No embeddings file found. Please run create_embeddings_light.py or create_embeddings.py first.")
+    # If no embeddings file found, try to generate them
+    st.warning("No embeddings file found. Attempting to generate embeddings...")
+    
+    try:
+        # Try to import and run the embedding creation
+        from create_embeddings_light import create_embeddings
+        
+        # Check if we have any text files to embed
+        text_files = []
+        for root, dirs, files in os.walk("extracted_content"):
+            for file in files:
+                if file.endswith(".txt"):
+                    text_files.append(os.path.join(root, file))
+        
+        if text_files:
+            st.info(f"Found {len(text_files)} text files. Generating embeddings...")
+            
+            # Create embeddings directory if it doesn't exist
+            os.makedirs("embeddings", exist_ok=True)
+            
+            # Generate embeddings
+            create_embeddings("embeddings/embeddings_light.json")
+            
+            # Try to load the newly created embeddings
+            if os.path.exists("embeddings/embeddings_light.json"):
+                st.success("Successfully generated embeddings!")
+                return load_embeddings("embeddings/embeddings_light.json")
+            else:
+                st.error("Failed to generate embeddings file")
+        else:
+            st.error("No text files found in extracted_content directory")
+            
+    except Exception as e:
+        st.error(f"Failed to generate embeddings: {str(e)}")
+    
+    # If we get here, show debug info
+    st.error("Error: No embeddings file found and could not generate new ones.")
     
     # Debug: Show what files exist
     st.write("🔍 Debug: Checking for embeddings files...")
