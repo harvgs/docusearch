@@ -1,9 +1,26 @@
 #!/bin/bash
 
-# Get port from environment variable, default to 8080
-PORT=${PORT:-8080}
+# Debug: Print all environment variables
+echo "🔍 Environment variables:"
+env | grep -i port || echo "No PORT variables found"
 
-echo "🚀 Starting DocuSearch Light on port $PORT"
+# Try to get port from various sources
+PORT_VAR=""
+if [ ! -z "$PORT" ]; then
+    PORT_VAR="$PORT"
+    echo "Found PORT=$PORT_VAR"
+elif [ ! -z "$STREAMLIT_SERVER_PORT" ]; then
+    PORT_VAR="$STREAMLIT_SERVER_PORT"
+    echo "Found STREAMLIT_SERVER_PORT=$PORT_VAR"
+else
+    PORT_VAR="8080"
+    echo "Using default port $PORT_VAR"
+fi
+
+# Clean up the port value
+PORT_VAR=$(echo $PORT_VAR | tr -d '"' | tr -d "'" | tr -d ' ')
+
+echo "🚀 Starting DocuSearch Light on port $PORT_VAR"
 echo "💻 Using CPU-only PyTorch for minimal deployment size"
 
 # Set cache directories to /tmp for Railway
@@ -20,5 +37,6 @@ if [ ! -f "embeddings/embeddings_light.json" ]; then
     echo "   The app will need to generate embeddings."
 fi
 
-# Start Streamlit with explicit port
-exec streamlit run docusearch_light.py --server.port=$PORT --server.address=0.0.0.0
+# Start Streamlit with the cleaned port value
+echo "Starting Streamlit on port $PORT_VAR"
+streamlit run docusearch_light.py --server.port=$PORT_VAR --server.address=0.0.0.0

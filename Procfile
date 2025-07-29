@@ -1,1 +1,1 @@
-web: bash start.sh
+web: streamlit run docusearch_light.py --server.port=$PORT --server.address=0.0.0.0

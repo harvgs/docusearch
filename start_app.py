@@ -11,21 +11,26 @@ import sys
 def get_port():
     """Get port from various possible sources"""
     # Try different environment variables
-    port = os.getenv('PORT') or os.getenv('STREAMLIT_SERVER_PORT') or '8080'
+    port_sources = ['PORT', 'STREAMLIT_SERVER_PORT', 'RAILWAY_STATIC_URL']
     
-    # Clean up the port value (remove any quotes or extra characters)
-    port = str(port).strip().strip('"').strip("'")
+    for source in port_sources:
+        port = os.getenv(source)
+        if port:
+            print(f"Found {source}={port}")
+            # Clean up the port value
+            port = str(port).strip().strip('"').strip("'")
+            try:
+                port_int = int(port)
+                if 1 <= port_int <= 65535:
+                    return port_int
+                else:
+                    print(f"Port {port_int} out of range, trying next source")
+            except ValueError:
+                print(f"Invalid port value '{port}', trying next source")
     
-    # Ensure it's a valid integer
-    try:
-        port_int = int(port)
-        if port_int <= 0 or port_int > 65535:
-            print(f"⚠️  Port {port_int} out of range, using 8080")
-            return 8080
-        return port_int
-    except ValueError:
-        print(f"⚠️  Invalid port value: '{port}', using 8080")
-        return 8080
+    # Default fallback
+    print("Using default port 8080")
+    return 8080
 
 def main():
     # Get the port
@@ -33,8 +38,11 @@ def main():
     print(f"🚀 Starting DocuSearch Light on port {port}")
     print("💻 Using CPU-only PyTorch for minimal deployment size")
     
-    # Debug: Print environment variables
-    print(f"🔍 Environment: PORT={os.getenv('PORT')}, STREAMLIT_SERVER_PORT={os.getenv('STREAMLIT_SERVER_PORT')}")
+    # Debug: Print all environment variables
+    print("🔍 Environment variables:")
+    for key, value in os.environ.items():
+        if 'PORT' in key.upper():
+            print(f"  {key}={value}")
     
     # Set cache directories to /tmp for Railway
     os.environ['TRANSFORMERS_CACHE'] = '/tmp/transformers_cache'
