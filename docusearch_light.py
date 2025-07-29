@@ -143,14 +143,22 @@ if project_api_key:
 def load_embeddings_data():
     # Try multiple possible paths for embeddings file
     embeddings_files = [
-        "embeddings/embeddings_light.json",  # Current directory
-        "embeddings/embeddings.json",        # Current directory
+        "embeddings_light.json",              # Main directory (preferred)
+        "embeddings.json",                    # Main directory
+        "embeddings/embeddings_light.json",   # Current directory
+        "embeddings/embeddings.json",         # Current directory
+        os.path.join(parent_directory, "embeddings_light.json"),
+        os.path.join(parent_directory, "embeddings.json"),
         os.path.join(parent_directory, "embeddings", "embeddings_light.json"),
         os.path.join(parent_directory, "embeddings", "embeddings.json"),
+        "/app/embeddings_light.json",         # Railway Docker path
+        "/app/embeddings.json",               # Railway Docker path
         "/app/embeddings/embeddings_light.json",  # Railway Docker path
         "/app/embeddings/embeddings.json",        # Railway Docker path
-        "./embeddings/embeddings_light.json",     # Relative to current
-        "./embeddings/embeddings.json"            # Relative to current
+        "./embeddings_light.json",            # Relative to current
+        "./embeddings.json",                  # Relative to current
+        "./embeddings/embeddings_light.json", # Relative to current
+        "./embeddings/embeddings.json"        # Relative to current
     ]
     
     for embeddings_file in embeddings_files:
@@ -166,17 +174,16 @@ def load_embeddings_data():
     st.warning("No embeddings file found. Creating minimal fallback embeddings...")
     
     try:
-        # Create a minimal embeddings structure
-        minimal_embeddings = {
-            "embeddings": [],
-            "documents": [
-                {
-                    "content": "This is a fallback document. Please upload your embeddings file or text files to generate proper embeddings.",
-                    "source_url": "fallback",
-                    "file_path": "fallback.txt"
-                }
-            ]
-        }
+        # Create a minimal embeddings structure that matches the expected format
+        # The search_embeddings function expects a list of dictionaries with 'embedding' and 'content' keys
+        minimal_embeddings = [
+            {
+                'file_path': 'fallback.txt',
+                'source_url': 'fallback',
+                'embedding': [0.0] * 384,  # Create a dummy embedding vector (384 is the size for all-MiniLM-L6-v2)
+                'content': "This is a fallback document. Please upload your embeddings file or text files to generate proper embeddings."
+            }
+        ]
         
         # Save the minimal embeddings
         os.makedirs("embeddings", exist_ok=True)
@@ -379,74 +386,28 @@ def calculate_cost(prompt, response):
 
 st.title("Document Search and Chat (Light Version)")
 
+# Simple API key input
+if not project_api_key:
+    st.warning("⚠️ Please enter your OpenAI API key to use the chat functionality")
+    api_key = st.text_input("OpenAI API Key:", type="password", help="Get your API key from https://platform.openai.com/api-keys")
+    if api_key:
+        is_valid, message = validate_openai_key(api_key)
+        if is_valid:
+            st.success("✅ API key is valid!")
+            project_api_key = api_key
+        else:
+            st.error(f"❌ {message}")
+else:
+    st.success("✅ API key is configured")
+
 # Load the embeddings
 embeddings_data = load_embeddings_data()
 
 # Sidebar for mode selection
-mode = st.sidebar.radio("Choose mode:", ("Search", "Chat", "Documents"))
+mode = st.sidebar.radio("Choose mode:", ("Chat", "Search", "Documents"))
 
 if "total_cost" not in st.session_state:
     st.session_state.total_cost = 0.0
-
-# Sidebar for configuration
-with st.sidebar:
-    st.title("🔧 Configuration")
-    
-    # OpenAI API Key input
-    st.subheader("🔑 OpenAI API Key")
-    api_key = st.text_input(
-        "Enter your OpenAI API key",
-        value=project_api_key or "",
-        type="password",
-        help="Get your API key from https://platform.openai.com/api-keys"
-    )
-    
-    # Validate API key
-    if api_key and api_key != project_api_key:
-        is_valid, message = validate_openai_key(api_key)
-        if is_valid:
-            st.success("✅ " + message)
-            project_api_key = api_key
-        else:
-            st.error("❌ " + message)
-    
-    # Model selection
-    st.subheader("🤖 Model Selection")
-    model = st.selectbox(
-        "Choose the model",
-        ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"],
-        help="gpt-4o-mini is recommended for cost and speed"
-    )
-    
-    # Temperature setting
-    temperature = st.slider(
-        "Temperature",
-        min_value=0.0,
-        max_value=2.0,
-        value=0.7,
-        step=0.1,
-        help="Higher values make output more creative, lower values more focused"
-    )
-    
-    # Max tokens setting
-    max_tokens = st.slider(
-        "Max tokens",
-        min_value=100,
-        max_value=4000,
-        value=1000,
-        step=100,
-        help="Maximum length of the response"
-    )
-    
-    # Search results count
-    search_results = st.slider(
-        "Search results",
-        min_value=1,
-        max_value=10,
-        value=3,
-        step=1,
-        help="Number of relevant documents to include in context"
-    )
 
 if mode == "Search":
     # Create a search box
