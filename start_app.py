@@ -8,12 +8,33 @@ import os
 import subprocess
 import sys
 
-def main():
-    # Get port from environment variable, default to 8080
-    port = os.getenv('PORT', '8080')
+def get_port():
+    """Get port from various possible sources"""
+    # Try different environment variables
+    port = os.getenv('PORT') or os.getenv('STREAMLIT_SERVER_PORT') or '8080'
     
+    # Clean up the port value (remove any quotes or extra characters)
+    port = str(port).strip().strip('"').strip("'")
+    
+    # Ensure it's a valid integer
+    try:
+        port_int = int(port)
+        if port_int <= 0 or port_int > 65535:
+            print(f"⚠️  Port {port_int} out of range, using 8080")
+            return 8080
+        return port_int
+    except ValueError:
+        print(f"⚠️  Invalid port value: '{port}', using 8080")
+        return 8080
+
+def main():
+    # Get the port
+    port = get_port()
     print(f"🚀 Starting DocuSearch Light on port {port}")
     print("💻 Using CPU-only PyTorch for minimal deployment size")
+    
+    # Debug: Print environment variables
+    print(f"🔍 Environment: PORT={os.getenv('PORT')}, STREAMLIT_SERVER_PORT={os.getenv('STREAMLIT_SERVER_PORT')}")
     
     # Set cache directories to /tmp for Railway
     os.environ['TRANSFORMERS_CACHE'] = '/tmp/transformers_cache'
@@ -32,11 +53,13 @@ def main():
     
     # Start Streamlit
     try:
-        subprocess.run([
+        cmd = [
             sys.executable, '-m', 'streamlit', 'run', 'docusearch_light.py',
-            '--server.port', port,
+            '--server.port', str(port),
             '--server.address', '0.0.0.0'
-        ], check=True)
+        ]
+        print(f"Running: {' '.join(cmd)}")
+        subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
         print(f"❌ Error starting Streamlit: {e}")
         sys.exit(1)
