@@ -1,6 +1,13 @@
 # Multi-stage build to reduce final image size
 FROM python:3.11-slim as builder
 
+# Set environment variables to prevent CUDA installation
+ENV CUDA_VISIBLE_DEVICES=""
+ENV TORCH_CUDA_ARCH_LIST=""
+ENV FORCE_CUDA="0"
+ENV TORCH_CUDA_VERSION=""
+ENV CUDA_HOME=""
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -12,11 +19,18 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy requirements and install Python dependencies
-COPY requirements_ultra_minimal.txt requirements.txt
+COPY requirements_cpu_only.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Final stage with minimal runtime
 FROM python:3.11-slim
+
+# Set environment variables to prevent CUDA usage
+ENV CUDA_VISIBLE_DEVICES=""
+ENV TORCH_CUDA_ARCH_LIST=""
+ENV FORCE_CUDA="0"
+ENV TORCH_CUDA_VERSION=""
+ENV CUDA_HOME=""
 
 # Install only runtime dependencies
 RUN apt-get update && apt-get install -y \
