@@ -53,10 +53,12 @@ Thumbs.db
 # Large data files - exclude all data to reduce size
 extracted_content/
 connections/
-# embeddings/  # Keep embeddings directory
-# embeddings_light.json  # Keep embeddings file in main directory
-# embeddings.json        # Keep embeddings file in main directory
 scrape_data.db
+
+# Keep embeddings files (required for app functionality)
+!embeddings_light.json
+!embeddings.json
+!embeddings/
 
 # Test files
 test_*.py

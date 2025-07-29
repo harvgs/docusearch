@@ -170,34 +170,9 @@ def load_embeddings_data():
                 st.warning(f"Failed to load {embeddings_file}: {str(e)}")
                 continue
     
-    # If no embeddings file found, create a minimal fallback
-    st.warning("No embeddings file found. Creating minimal fallback embeddings...")
-    
-    try:
-        # Create a minimal embeddings structure that matches the expected format
-        # The search_embeddings function expects a list of dictionaries with 'embedding' and 'content' keys
-        minimal_embeddings = [
-            {
-                'file_path': 'fallback.txt',
-                'source_url': 'fallback',
-                'embedding': [0.0] * 384,  # Create a dummy embedding vector (384 is the size for all-MiniLM-L6-v2)
-                'content': "This is a fallback document. Please upload your embeddings file or text files to generate proper embeddings."
-            }
-        ]
-        
-        # Save the minimal embeddings
-        os.makedirs("embeddings", exist_ok=True)
-        with open("embeddings/embeddings_light.json", "w") as f:
-            json.dump(minimal_embeddings, f)
-        
-        st.success("Created minimal fallback embeddings!")
-        return minimal_embeddings
-        
-    except Exception as e:
-        st.error(f"Failed to create fallback embeddings: {str(e)}")
-    
-    # If we get here, show debug info
-    st.error("Error: No embeddings file found and could not create fallback.")
+    # No embeddings file found - show clear error and stop
+    st.error("❌ No embeddings file found!")
+    st.error("The embeddings_light.json file is required for this app to work.")
     
     # Debug: Show what files exist
     st.write("🔍 Debug: Checking for embeddings files...")
@@ -211,6 +186,23 @@ def load_embeddings_data():
                 st.write(f"Error listing {path}: {e}")
         else:
             st.write(f"Directory does not exist: {path}")
+    
+    # Check main directory
+    st.write("🔍 Checking main directory files:")
+    try:
+        main_files = [f for f in os.listdir(".") if f.endswith('.json')]
+        st.write(f"JSON files in main directory: {main_files}")
+    except Exception as e:
+        st.write(f"Error listing main directory: {e}")
+    
+    st.error("""
+    **To fix this:**
+    1. Copy your `embeddings_light.json` file to the main directory of this project
+    2. Make sure the file is committed to your git repository
+    3. Redeploy to Railway
+    
+    The embeddings file contains the processed document data needed for search and chat functionality.
+    """)
     
     st.stop()
 
