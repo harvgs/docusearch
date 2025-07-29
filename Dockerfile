@@ -47,9 +47,17 @@ WORKDIR /app
 COPY docusearch_light.py .
 COPY create_embeddings_light.py .
 COPY start_app.py .
+COPY verify_embeddings.py .
 
 # Create directories for data (will be mounted or uploaded separately)
 RUN mkdir -p embeddings extracted_content connections
+
+# Copy embeddings files (required for app functionality)
+COPY embeddings/embeddings_light.json ./embeddings/
+COPY embeddings/embeddings.json ./embeddings/
+
+# Verify embeddings files are present and valid
+RUN python verify_embeddings.py
 
 # Expose port
 EXPOSE 8080

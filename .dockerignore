@@ -1,3 +1,8 @@
+# Keep embeddings files (required for app functionality) - MUST BE FIRST
+!embeddings/
+!embeddings/embeddings_light.json
+!embeddings/embeddings.json
+
 # Python
 __pycache__/
 *.py[cod]
@@ -54,11 +59,6 @@ Thumbs.db
 extracted_content/
 connections/
 scrape_data.db
-
-# Keep embeddings files (required for app functionality)
-!embeddings_light.json
-!embeddings.json
-!embeddings/
 
 # Test files
 test_*.py
