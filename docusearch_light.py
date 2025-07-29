@@ -417,9 +417,6 @@ if mode == "Search":
             if result.get('source_url'):
                 st.markdown(f"**Source:** [{result['source_url']}]({result['source_url']})")
             
-            if result.get('file_path'):
-                create_download_button(result['file_path'], f"search_{i}")
-            
             st.markdown("---")
 
 elif mode == "Chat":
@@ -474,8 +471,6 @@ elif mode == "Chat":
             # Display unique sources and create download buttons
             for i, (source, doc) in enumerate(unique_sources.items()):
                 st.markdown(f"- {source}")
-                if doc.metadata.get('file_path'):
-                    create_download_button(doc.metadata['file_path'], f"chat_{i}")
             
             st.markdown(f"**Cost of this interaction: ${cost:.4f}**")
             st.markdown(f"**Total session cost: ${st.session_state.total_cost:.4f}**")
@@ -517,7 +512,6 @@ else:  # Documents mode
             if doc['source_url']:
                 st.markdown(f"Source: [{doc['source_url']}]({doc['source_url']})")
             st.markdown(f"Preview: {doc['content_preview']}")
-            create_download_button(doc['file_path'], f"doc_list_{dir_name}_{i}")
             st.markdown("---")
         
         if len(docs) > 5:
