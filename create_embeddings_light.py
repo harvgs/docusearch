@@ -1,7 +1,3 @@
-try:
-    from langchain_huggingface import HuggingFaceEmbeddings
-except ImportError:
-    from langchain_community.embeddings import HuggingFaceEmbeddings
 import torch
 import os
 import json
@@ -11,6 +7,7 @@ from pathlib import Path
 import requests
 import warnings
 import urllib3
+from sentence_transformers import SentenceTransformer
 
 # Disable SSL verification warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -25,16 +22,10 @@ class LightEmbeddingProcessor:
         # Use a much smaller model for deployment
         device = "cuda" if torch.cuda.is_available() else "cpu"
         
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=model_name,
-            model_kwargs={
-                'device': device
-            },
-            encode_kwargs={'normalize_embeddings': True},
-        )
+        self.model = SentenceTransformer(model_name, device=device)
     
     def create_embedding(self, text):
-        return self.embeddings.embed_query(text)
+        return self.model.encode(text, convert_to_tensor=False).tolist()
 
 def process_text_files(input_folder, output_file, batch_size=32):
     processor = LightEmbeddingProcessor()

@@ -253,11 +253,11 @@ def get_chat_response(query, chat_history, embeddings_data):
         # Convert sources to Document format for compatibility
         source_docs = []
         for source in sources:
-            from langchain.schema import Document
-            doc = Document(
-                page_content="Source document",
-                metadata=source
-            )
+            # Create a simple document object without langchain
+            doc = type('Document', (), {
+                'page_content': "Source document",
+                'metadata': source
+            })()
             source_docs.append(doc)
         
         return answer, source_docs

@@ -12,7 +12,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy requirements and install Python dependencies
-COPY requirements_minimal.txt requirements.txt
+COPY requirements_ultra_minimal.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Final stage with minimal runtime
