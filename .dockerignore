@@ -53,4 +53,4 @@ Thumbs.db
 # Large data files (if not needed for deployment)
 extracted_content/
 connections/
-embeddings/embeddings.json
+# embeddings/embeddings.json
