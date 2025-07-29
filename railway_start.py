@@ -8,11 +8,8 @@ import subprocess
 import sys
 
 def main():
-    # Get port from Railway environment
-    port = os.getenv('PORT', '8080')
-    
-    # Clean the port value
-    port = str(port).strip().strip('"').strip("'")
+    # Hardcode the port to avoid environment variable issues
+    port = "8080"
     
     print(f"🚀 Starting DocuSearch Light on Railway")
     print(f"📡 Port: {port}")
@@ -28,7 +25,7 @@ def main():
     os.makedirs('/tmp/torch_cache', exist_ok=True)
     os.makedirs('/tmp/hf_cache', exist_ok=True)
     
-    # Start Streamlit
+    # Start Streamlit with hardcoded port
     cmd = [
         sys.executable, '-m', 'streamlit', 'run', 'docusearch_light.py',
         '--server.port', port,

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Get the port from Railway environment
-PORT=${PORT:-8080}
+# Hardcode the port to avoid environment variable issues
+PORT=8080
 
 echo "🚀 Starting DocuSearch Light on Railway"
 echo "📡 Port: $PORT"
