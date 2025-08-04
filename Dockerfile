@@ -47,6 +47,7 @@ WORKDIR /app
 COPY docusearch_light.py .
 COPY create_embeddings_light.py .
 COPY start_app.py .
+COPY start_simple.py .
 COPY verify_embeddings.py .
 
 # Create directories for data (will be mounted or uploaded separately)
@@ -67,4 +68,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/ || exit 1
 
 # Start the application using Python startup script
+# Alternative: CMD ["python", "start_simple.py"] for Railway
 CMD ["python", "start_app.py"]

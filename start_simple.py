@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Startup script for Railway deployment
-Hardcoded to port 8080 for Railway compatibility
+Simple startup script for Railway deployment
+Directly runs Streamlit on port 8080
 """
 
 import os
@@ -9,16 +9,8 @@ import subprocess
 import sys
 
 def main():
-    # Hardcode port to 8080 for Railway
-    port = 8080
-    print(f"🚀 Starting DocuSearch Light on port {port}")
+    print("🚀 Starting DocuSearch Light on port 8080")
     print("💻 Using CPU-only PyTorch for minimal deployment size")
-    
-    # Debug: Print all environment variables
-    print("🔍 Environment variables:")
-    for key, value in os.environ.items():
-        if 'PORT' in key.upper():
-            print(f"  {key}={value}")
     
     # Set cache directories to /tmp for Railway
     os.environ['TRANSFORMERS_CACHE'] = '/tmp/transformers_cache'
@@ -35,11 +27,11 @@ def main():
         print("⚠️  Warning: embeddings_light.json not found")
         print("   The app will need to generate embeddings.")
     
-    # Start Streamlit
+    # Start Streamlit directly with hardcoded port
     try:
         cmd = [
             sys.executable, '-m', 'streamlit', 'run', 'docusearch_light.py',
-            '--server.port', str(port),
+            '--server.port', '8080',
             '--server.address', '0.0.0.0'
         ]
         print(f"Running: {' '.join(cmd)}")
@@ -52,4 +44,4 @@ def main():
         sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    main() 
