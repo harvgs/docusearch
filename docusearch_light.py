@@ -376,7 +376,7 @@ def calculate_cost(prompt, response):
     except Exception:
         return 0.0
 
-st.title("Document Search and Chat (Light Version)")
+st.title("[Connections](http://connections/) Chatbot")
 
 # Simple API key input
 if not project_api_key:
